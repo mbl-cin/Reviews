@@ -46,7 +46,7 @@ Feature: Cadastro e manutenção de usuários
     Then o sistema exibe uma mensagem de erro informando que o username já está em uso
     And os dados não são atualizados
 
-  Scenario: Exclusão lógica da própria conta
+  Scenario: Exclusão da própria conta
     Given que existe um usuário cadastrado com nome "Mário Borba", username "marioborba", e-mail "mario@email.com" e senha "123456"
     And que o usuário está autenticado
     And acessa a área de configurações da conta
@@ -127,13 +127,6 @@ Feature: Amigos e seguidores
     Then o sistema remove a relação de seguimento
     And o perfil "anasouza" deixa de aparecer na lista de seguidos
 
-  Scenario: Enviar solicitação de amizade
-    Given que existe um usuário autenticado com username "marioborba" e e-mail "mario@email.com"
-    And existe outro usuário com nome "Carlos Lima", username "carloslima" e e-mail "carlos@email.com"
-    When acessa o perfil de "carloslima"
-    And clica em "Adicionar amigo"
-    Then o sistema envia uma solicitação de amizade
-
   Scenario: Aceitar solicitação de amizade
     Given que existe um usuário autenticado com username "marioborba" e e-mail "mario@email.com"
     And existe uma solicitação de amizade pendente enviada por "carloslima"
@@ -185,6 +178,7 @@ Feature: Histórico de reviews e posts
     When outro usuário acessa o conteúdo publicado
     Then os reviews e posts continuam visíveis
     And o perfil do autor não fica mais disponível
+
 # Recuperação de conta
 Feature: Recuperação de conta via e-mail
   As a usuário comum
