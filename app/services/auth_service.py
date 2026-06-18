@@ -8,14 +8,16 @@ from app.schemas.user import UserCreate, UserLogin, UserUpdate
 class AuthService:
     @staticmethod
     async def register_user(data: UserCreate) -> User:
-        existing_email = await User.find_one(User.email == data.email)
+        # Busca alterada para dicionário nativo (evita o AttributeError)
+        existing_email = await User.find_one({"email": data.email})
         if existing_email:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="E-mail já está em uso",
             )
 
-        existing_username = await User.find_one(User.username == data.username)
+        # Busca alterada para dicionário nativo
+        existing_username = await User.find_one({"username": data.username})
         if existing_username:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -40,7 +42,8 @@ class AuthService:
 
     @staticmethod
     async def login_user(data: UserLogin) -> str:
-        user = await User.find_one(User.email == data.email)
+        # Busca alterada para dicionário nativo
+        user = await User.find_one({"email": data.email})
 
         if not user or not verify_password(data.password, user.hashed_password):
             raise HTTPException(
@@ -68,7 +71,8 @@ class AuthService:
 
     @staticmethod
     async def get_user_by_email(email: str) -> User:
-        user = await User.find_one(User.email == email)
+        # Busca alterada para dicionário nativo
+        user = await User.find_one({"email": email})
 
         if not user:
             raise HTTPException(
@@ -84,7 +88,8 @@ class AuthService:
 
         new_username = update_data.get("username")
         if new_username and new_username != current_user.username:
-            existing_username = await User.find_one(User.username == new_username)
+            # Busca alterada para dicionário nativo
+            existing_username = await User.find_one({"username": new_username})
             if existing_username and str(existing_username.id) != str(current_user.id):
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,

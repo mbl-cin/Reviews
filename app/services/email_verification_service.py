@@ -50,14 +50,21 @@ class EmailVerificationService:
     @staticmethod
     async def verify(token: str) -> None:
         token_data = await EmailVerificationToken.find_one(
-            EmailVerificationToken.token == token
+            {"token": token}  # Mantendo a busca segura via dicionário nativo
         )
 
-        if (
-            not token_data
-            or token_data.used
-            or datetime.now(UTC) > token_data.expires_at
-        ):
+        if not token_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Token de verificação inválido ou expirado",
+            )
+
+        # 🚨 SOLUÇÃO: Normaliza a data vinda do banco adicionando a informação de UTC
+        expires_at = token_data.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
+
+        if token_data.used or datetime.now(UTC) > expires_at:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Token de verificação inválido ou expirado",

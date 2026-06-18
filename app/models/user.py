@@ -2,15 +2,14 @@ from datetime import datetime, UTC
 from enum import Enum
 from typing import Optional
 
-from beanie import Document, Indexed
+from beanie import Document
 from pydantic import BaseModel, EmailStr, Field
-
+from pymongo import IndexModel, ASCENDING  # <-- Importamos as ferramentas de índice do pymongo
 
 class ListStatus(str, Enum):
     read = "read"
     watched = "watched"
     dropped = "dropped"
-
 
 class UserListItem(BaseModel):
     item_id: str
@@ -19,11 +18,10 @@ class UserListItem(BaseModel):
     status: ListStatus
     added_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
-
 class User(Document):
     name: str
-    username: Indexed(str, unique=True)
-    email: Indexed(EmailStr, unique=True)
+    username: str  # <-- Voltaram a ser tipos normais
+    email: EmailStr  # <-- Voltaram a ser tipos normais
     hashed_password: str
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -35,3 +33,8 @@ class User(Document):
 
     class Settings:
         name = "users"
+        # Declaramos as regras de unicidade diretamente no banco de dados, do jeito mais seguro!
+        indexes = [
+            IndexModel([("username", ASCENDING)], unique=True),
+            IndexModel([("email", ASCENDING)], unique=True)
+        ]

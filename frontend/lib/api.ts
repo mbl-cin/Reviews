@@ -97,6 +97,13 @@ export const api = {
         return res;
       },
 
+      register: async (name: string, username: string, email: string, password: string) => {
+        return request<any>("/auth/register", {
+          method: "POST",
+          body: JSON.stringify({ name, username, email, password }),
+        });
+      },
+
   listUsers: () => request<{ data: User[] }>("/admin/users").then((r) => r.data),
   createUser: (u: { username: string; email?: string; password: string; role: string }) =>
     request<{ data: User }>("/admin/users", { method: "POST", body: JSON.stringify(u) }).then(

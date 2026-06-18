@@ -4,17 +4,18 @@ import { useState } from "react";
 import React from 'react';
 import { useRouter } from "next/navigation";
 import { Clapperboard, ShieldCheck, Users, ScrollText, AlertCircle, Star, Film, BookOpen } from "lucide-react";
+
+// Trocamos o @/ pelos caminhos relativos para evitar erro no tsconfig!
 import { api, ApiError } from "@/lib/api";
 import { setSession } from "@/lib/auth";
 import { translateError } from "@/lib/copy";
+
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
   
-  // Estado para controlar se é login de admin ou usuário comum
   const [isAdminMode, setIsAdminMode] = useState(false);
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,22 +27,18 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      // Aqui usamos a função do seu amigo. 
-      // IMPORTANTE: garanta que a api.login envia os dados como JSON {"email": email, "password": password}
       const res = await api.login(email, password);
       
-      // Salva a sessão
       setSession({ 
         token: res.access_token, 
         role: res.role || "user", 
         username: res.username || email.split('@')[0] 
       });
       
-      // Redireciona com base no papel (role) ou no modo selecionado
       if (isAdminMode || res.role === "admin") {
         router.replace("/dashboard");
       } else {
-        router.replace("/feed");
+        router.replace("/profile");
       }
     } catch (err) {
       const msg = err instanceof ApiError ? translateError(err.message) : "Não foi possível conectar ao servidor";
@@ -54,7 +51,6 @@ export default function LoginPage() {
   return (
     <div className="auth-split" style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg)' }}>
       
-      {/* LADO ESQUERDO - Muda dinamicamente */}
       <aside className="auth-aside" style={{ flex: 1, padding: '40px', background: isAdminMode ? 'var(--surface)' : 'linear-gradient(135deg, #0d0f14 0%, #1a1040 40%, #0f0d20 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div className="brand" style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span className="brand-mark" style={{ color: 'var(--accent)' }}>
@@ -99,11 +95,9 @@ export default function LoginPage() {
         </div>
       </aside>
 
-      {/* LADO DIREITO - Formulário */}
       <main className="auth-main" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
         <div className="card auth-card" data-cy="login-card" style={{ width: '100%', maxWidth: '400px', background: 'var(--surface)', padding: '40px', borderRadius: '16px', border: '1px solid var(--border)' }}>
           
-          {/* TOGGLE ADMIN / USUÁRIO */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', background: 'var(--surface2)', padding: '4px', borderRadius: '8px' }}>
             <button 
               onClick={() => setIsAdminMode(false)} 
